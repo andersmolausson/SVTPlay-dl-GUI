@@ -1,40 +1,135 @@
 # SVTPlay-dl Web GUI
 
-Ett webbaserat grafiskt gränssnitt för [svtplay-dl](https://svtplay-dl.se/), verktyget för att ladda ner videos från svenska streamingsajter.
+Ett webbaserat grafiskt gränssnitt för [svtplay-dl](https://svtplay-dl.se/), verktyget för att ladda ner videos från svenska streamingsajter som **SVT Play** och **TV4 Play**.
 
 ## Funktioner
 
 - 📺 Ladda ner enskilda TV-program
 - 📦 Ladda ner hela säsonger automatiskt
+- 🎯 **Realtidsspårning av avsnitt** - Se exakt vilka avsnitt som laddas ner och vilka som hoppas över
+- 🔑 **TV4 Play-stöd** - Fullständigt stöd med token-autentisering och enkla instruktioner
+- 💾 **Anpassade nedladdningsmappar** - Välj var dina filer ska sparas med inbyggd mappbläddrare
+- 📑 **Sparade profiler** - Spara inställningar för återkommande nedladdningar (perfekt för veckovisa program)
 - 🌐 Webbaserat gränssnitt tillgängligt från alla datorer i nätverket
-- 📊 Realtidsuppdatering av nedladdningsstatus
+- 📊 Realtidsuppdatering av nedladdningsstatus med detaljerad episodinformation
 - 🎬 Kvalitetsval (1080p, 720p, 480p eller bästa tillgängliga)
 - 💬 Automatisk nedladdning av undertexter
-- 📁 Filhantering med möjlighet att ladda ner färdiga filer
+- 📁 Automatisk organisering i undermappar per serie
+- 🔄 Filhantering med möjlighet att ladda ner färdiga filer
 
 ## Supporterade sajter
 
-Primärt fokus på:
-- SVT Play (svtplay.se)
+**Primärt fokus och fullt stöd:**
+- **SVT Play** (svtplay.se)
+- **TV4 Play** (tv4play.se) - Med token-autentisering för premium-innehåll
 
-Andra svenska streamingsajter som stöds av svtplay-dl:
-- TV4 Play
+**Andra svenska streamingsajter som stöds av svtplay-dl:**
 - Viafree
 - Dplay
 - och många fler...
 
-## Installation på Windows
+## Installation
 
 ### Förutsättningar
 
-1. **Python 3.8 eller senare**
+1. **Python 3.9 eller senare (rekommenderat: 3.12 eller 3.13)**
    - Ladda ner från [python.org](https://www.python.org/downloads/)
-   - **VIKTIGT**: Bocka i "Add Python to PATH" under installationen
+   - **VIKTIGT (Windows)**: Bocka i "Add Python to PATH" under installationen
+   - **OBS:** Python 3.8 fungerar INTE med moderna svtplay-dl-versioner
 
 2. **ffmpeg** (krävs för svtplay-dl)
-   - Ladda ner från [ffmpeg.org](https://ffmpeg.org/download.html#build-windows)
-   - Eller använd [Chocolatey](https://chocolatey.org/): `choco install ffmpeg`
-   - Eller använd [Scoop](https://scoop.sh/): `scoop install ffmpeg`
+   - **Windows**:
+     - Ladda ner från [ffmpeg.org](https://ffmpeg.org/download.html#build-windows)
+     - Eller använd [Chocolatey](https://chocolatey.org/): `choco install ffmpeg`
+     - Eller använd [Scoop](https://scoop.sh/): `scoop install ffmpeg`
+   - **macOS**: `brew install ffmpeg`
+   - **Linux**: `sudo apt install ffmpeg` (Debian/Ubuntu) eller `sudo dnf install ffmpeg` (Fedora)
+
+3. **Windows Terminal (rekommenderat för Windows-användare)**
+   - Moderna kommandotolk med bättre support för Python
+   - Installera från [Microsoft Store](https://aka.ms/terminal) eller `winget install Microsoft.WindowsTerminal`
+   - Alternativt kan du använda PowerShell eller CMD (äldre)
+
+### Lägg till Python och FFmpeg i PATH
+
+För att kunna köra `python` och `ffmpeg` från kommandoraden måste de finnas i din systems PATH.
+
+#### Windows
+
+**För Python:**
+1. Om du glömde bocka i "Add Python to PATH" under installationen:
+   - Öppna "Redigera systemets miljövariabler" (sök i Start-menyn)
+   - Klicka på "Miljövariabler..." längst ner
+   - Under "Systemvariabler", hitta "Path" och klicka "Redigera"
+   - Klicka "Ny" och lägg till (ersätt med din Python-sökväg):
+     - `C:\Users\[DITT ANVÄNDARNAMN]\AppData\Local\Programs\Python\Python311`
+     - `C:\Users\[DITT ANVÄNDARNAMN]\AppData\Local\Programs\Python\Python311\Scripts`
+   - Klicka "OK" på alla fönster
+   - **Starta om terminalen** för att ändringarna ska träda i kraft
+
+2. Testa att det fungerar:
+   ```cmd
+   python --version
+   ```
+
+**För FFmpeg:**
+1. Om du installerade manuellt (inte via Chocolatey/Scoop):
+   - Packa upp FFmpeg till en mapp, t.ex. `C:\ffmpeg`
+   - Öppna "Redigera systemets miljövariabler"
+   - Klicka på "Miljövariabler..."
+   - Under "Systemvariabler", hitta "Path" och klicka "Redigera"
+   - Klicka "Ny" och lägg till: `C:\ffmpeg\bin`
+   - Klicka "OK" på alla fönster
+   - **Starta om terminalen**
+
+2. Testa att det fungerar:
+   ```cmd
+   ffmpeg -version
+   ```
+
+**Om du använder Chocolatey eller Scoop** läggs allt automatiskt till i PATH!
+
+#### macOS
+
+PATH hanteras vanligtvis automatiskt på macOS när du använder Homebrew. Om något inte fungerar:
+
+1. Öppna Terminal
+2. Redigera din shell-konfiguration:
+   ```bash
+   nano ~/.zshrc   # För nyare macOS (Catalina+)
+   # eller
+   nano ~/.bash_profile   # För äldre macOS
+   ```
+
+3. Lägg till (om Python/FFmpeg installerades på annan plats):
+   ```bash
+   export PATH="/usr/local/bin:$PATH"
+   ```
+
+4. Spara och ladda om:
+   ```bash
+   source ~/.zshrc
+   ```
+
+#### Linux
+
+PATH hanteras vanligtvis automatiskt när du använder `apt`, `dnf` eller andra pakethanterare. Om något inte fungerar:
+
+1. Öppna Terminal
+2. Redigera `.bashrc`:
+   ```bash
+   nano ~/.bashrc
+   ```
+
+3. Lägg till i slutet:
+   ```bash
+   export PATH="/usr/local/bin:$PATH"
+   ```
+
+4. Spara och ladda om:
+   ```bash
+   source ~/.bashrc
+   ```
 
 ### Steg-för-steg installation
 
@@ -47,48 +142,153 @@ Andra svenska streamingsajter som stöds av svtplay-dl:
 2. **Skapa en virtuell miljö** (rekommenderat)
    ```bash
    python -m venv venv
-   venv\Scripts\activate
    ```
 
-3. **Installera beroenden**
+3. **Aktivera den virtuella miljön**
+
+   **Windows (PowerShell / Windows Terminal):**
+   ```powershell
+   venv\Scripts\Activate.ps1
+   ```
+
+   **Windows (CMD):**
+   ```cmd
+   venv\Scripts\activate.bat
+   ```
+
+   **macOS / Linux:**
+   ```bash
+   source venv/bin/activate
+   ```
+
+   **Obs!** Om du får felmeddelande om körning av skript i PowerShell, kör:
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   ```
+
+4. **Installera beroenden**
+
+   Detta installerar Flask, svtplay-dl och alla andra nödvändiga paket:
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Starta servern**
+5. **Starta servern**
+
+   **Windows - Enklaste sättet:**
+   - Dubbelklicka på `start.bat`
+
+   **Alla plattformar - Manuellt:**
    ```bash
    python app.py
    ```
 
-5. **Öppna webbläsaren**
+6. **Öppna webbläsaren**
    - På samma dator: `http://localhost:5000`
    - Från andra datorer i nätverket: `http://[DIN_SERVER_IP]:5000`
 
-   För att hitta din server-IP:
-   ```bash
-   ipconfig
-   ```
-   Leta efter "IPv4 Address" under din nätverksadapter
+   **Hitta din server-IP:**
+   - **Windows**: `ipconfig` (leta efter "IPv4 Address")
+   - **macOS**: `ifconfig` (leta efter "inet" under din nätverksadapter)
+   - **Linux**: `ip addr` eller `hostname -I`
 
 ## Användning
 
-### Ladda ner ett enskilt program
+### Snabbstart: Ladda ner från SVT Play
 
 1. Gå till SVT Play och hitta programmet du vill ladda ner
 2. Kopiera URL:en från adressfältet
 3. Klistra in URL:en i "Video-URL" fältet
-4. Välj "Enskilt avsnitt"
-5. Välj önskad kvalitet
-6. Klicka på "Starta nedladdning"
+4. (Valfritt) Ange en anpassad nedladdningsmapp, t.ex. `D:\TV-Serier`
+5. Välj "Enskilt avsnitt" eller "Hela säsongen"
+6. Välj önskad kvalitet
+7. Klicka på "Starta nedladdning"
 
-### Ladda ner en hel säsong
+### Snabbstart: Ladda ner från TV4 Play
 
-1. Gå till SVT Play och hitta serien
-2. Kopiera URL:en (kan vara från vilket avsnitt som helst i serien)
-3. Klistra in URL:en i "Video-URL" fältet
-4. Välj "Hela säsongen"
-5. Välj önskad kvalitet
-6. Klicka på "Starta nedladdning"
+1. **Hämta token först** (se [TV4 Play-instruktioner](#tv4-play-och-premium-innehåll) nedan)
+2. Gå till TV4 Play och hitta programmet (t.ex. "Bäst i test")
+3. Kopiera URL:en (använd programsidan för hela säsongen: `https://www.tv4play.se/program/bast-i-test`)
+4. Klistra in URL:en i "Video-URL" fältet
+5. Klistra in din **token** i "Token"-fältet
+6. Välj "Hela säsongen" för att få alla avsnitt
+7. Klicka på "Starta nedladdning"
+8. **Se realtidsstatus** - Listan visar vilka avsnitt som laddas ner (✅) och vilka som hoppas över (⏭️)
+
+### Använda sparade profiler (för återkommande nedladdningar)
+
+**För att spara en profil:**
+1. Ange ett **Serie-namn** (t.ex. "På Spåret")
+2. Ange **Video-URL** till serien
+3. Ange **Nedladdningsmapp** där du vill spara serien (t.ex. `D:\TV-Serier\På Spåret`)
+4. Välj kvalitet och övriga inställningar
+5. Klicka på **"Spara profil"**
+
+**För att använda en sparad profil:**
+1. Välj profilen från **"Sparade serier"**-dropdown
+2. Alla inställningar fylls i automatiskt
+3. Klicka på **"Starta nedladdning"**
+
+**För att ta bort en profil:**
+1. Välj profilen från dropdown
+2. Klicka på papperskorgs-ikonen bredvid dropdown
+
+**Användningsfall:**
+- Ladda ner nya avsnitt av "På Spåret" varje vecka utan att ange URL och mapp varje gång
+- Ha olika profiler för olika serier med olika nedladdningsmappar
+- Spara inställningar för återkommande nedladdningar
+
+### TV4 Play och premium-innehåll
+
+För att ladda ner från TV4 Play behöver du oftast ange en **refresh token** från din inloggning.
+
+**Enklaste metoden att hämta token:**
+
+1. Öppna [TV4 Play](https://www.tv4play.se/) i din webbläsare och logga in
+2. Tryck `F12` för att öppna Developer Tools
+3. Gå till fliken **"Console"**
+4. Klistra in följande kod och tryck Enter:
+   ```javascript
+   document.cookie.split("; ").find((row) => row.startsWith("tv4-refresh-token="))?.split("=")[1];
+   ```
+5. Kopiera den text som visas (utan citattecken)
+6. Klistra in i **"Token"**-fältet i GUI:t
+
+**Alternativ metod (manuell sökning):**
+
+1. Öppna TV4 Play och logga in
+2. Tryck `F12` → Fliken "Application" (Chrome) eller "Storage" (Firefox)
+3. Välj "Cookies" → "https://www.tv4play.se"
+4. Hitta cookien som heter **`tv4-refresh-token`**
+5. Kopiera värdet (börjar ofta med "ey...")
+
+**Tips:**
+- Token är oftast giltig i 30+ dagar
+- Spara token i en profil så slipper du kopiera varje gång
+- Du kan använda token från vilken dator som helst (den behöver inte vara från nedladdningsservern)
+- För gratis innehåll på TV4 Play kan token behövas även om ingen inloggning krävs för att se videon
+
+### Anpassade nedladdningsmappar
+
+Du kan ange var filer ska laddas ner genom att fylla i "Nedladdningsmapp"-fältet:
+
+**Exempel:**
+- Windows: `D:\TV-Serier` eller `C:\Users\Anders\Videos\Serier`
+- macOS: `/Users/anders/Videos/Serier`
+- Linux: `/home/anders/videos/serier`
+
+**Filstruktur:**
+Programmet skapar automatiskt undermappar för varje serie:
+```
+D:\TV-Serier\
+├── På Spåret\
+│   ├── På Spåret_S01E01_Avsnitt 1.mp4
+│   └── På Spåret_S01E02_Avsnitt 2.mp4
+└── Aktuellt\
+    └── Aktuellt_Kvällens nyheter.mp4
+```
+
+**Om inget anges:** Filer hamnar i standardmappen `downloads/` i projektets katalog.
 
 ### Hämta information
 
@@ -99,9 +299,10 @@ Innan du laddar ner kan du klicka på "Hämta info" för att se:
 
 ### Nedladdade filer
 
-- Alla nedladdade filer hamnar i mappen `downloads/`
+- Filer hamnar i den angivna mappen (eller `downloads/` om ingen mapp angetts)
 - Du kan ladda ner filer direkt från webbgränssnittet
 - Filer namnges automatiskt med programmets titel och avsnittsnummer
+- Varje serie får sin egen undermapp
 
 ## Konfiguration
 
@@ -116,6 +317,67 @@ PORT = 5000       # Port nummer
 DOWNLOAD_DIR = 'downloads'  # Mapp för nedladdningar
 DEFAULT_QUALITY = 'best'    # Standardkvalitet
 DEFAULT_SUBTITLE = True     # Ladda ner undertexter som standard
+```
+
+## Underhåll och uppdatering
+
+### Webbaserad uppgradering (enklast!)
+
+**Öppna webbläsaren → Scrolla ner → Klicka "Uppgradera system"** 🎉
+
+Den webbaserade uppgraderingen:
+1. ✅ Visar nuvarande Python- och svtplay-dl-versioner
+2. ✅ Visar git branch och senaste commit
+3. ✅ Uppgraderar med ett klick direkt i webbläsaren
+4. ✅ Visar real-time progress och loggar
+5. ✅ Berättar om du behöver starta om servern
+
+**Perfekt för icke-tekniska användare!** Inget behov av terminal eller kommandon.
+
+### Uppgradering via skript (Windows)
+
+**Dubbelklicka på `upgrade.bat`** - det är allt! 🚀
+
+Skriptet gör automatiskt:
+1. ✅ Hämtar senaste uppdateringar från GitHub
+2. ✅ Uppgraderar alla Python-paket (inklusive svtplay-dl)
+3. ✅ Frågar om du vill starta servern direkt
+
+Se `UPGRADE-GUIDE.md` för mer information.
+
+### Manuell uppdatering (alla plattformar)
+
+#### Uppdatera svtplay-dl
+
+Du kan uppdatera svtplay-dl till senaste versionen **utan att ändra din kod**:
+
+1. **Aktivera den virtuella miljön** (se installationsinstruktioner ovan)
+
+2. **Uppdatera svtplay-dl:**
+   ```bash
+   pip install --upgrade svtplay-dl
+   ```
+
+3. **Kontrollera versionen:**
+   ```bash
+   svtplay-dl --version
+   ```
+
+4. **Testa att det fungerar** genom att ladda ner ett testprogram i webbgränssnittet
+
+**Varför det fungerar:** Din kod använder svtplay-dl som ett externt kommandoradsverktyg. Så länge kommandoradsgränssnittet förblir kompatibelt (vilket det nästan alltid gör), kommer allt fungera efter uppdatering.
+
+**När du bör uppdatera:**
+- När nya funktioner läggs till i svtplay-dl
+- När säkerhetsuppdateringar släpps
+- När nedladdningar plötsligt slutar fungera (kan bero på ändringar på streamingsajterna)
+
+### Uppdatera alla Python-paket
+
+För att uppdatera alla paket (Flask, svtplay-dl, etc.):
+
+```bash
+pip install --upgrade -r requirements.txt
 ```
 
 ## Köra som Windows-tjänst (valfritt)
@@ -153,22 +415,35 @@ För att andra datorer ska kunna komma åt servern:
 ## Felsökning
 
 ### "Python hittades inte"
-- Kontrollera att Python är installerat: `python --version`
-- Se till att Python finns i PATH
+- Kontrollera att Python är installerat: `python --version` (eller `python3 --version` på macOS/Linux)
+- **Windows**: Se till att Python finns i PATH (bocka i "Add Python to PATH" vid installation)
+- **macOS/Linux**: Installera via pakethanterare eller python.org
 
 ### "ffmpeg hittades inte"
 - Kontrollera att ffmpeg är installerat: `ffmpeg -version`
-- Se till att ffmpeg finns i PATH
+- **Windows**: Se till att ffmpeg finns i PATH, eller installera via Chocolatey/Scoop
+- **macOS**: `brew install ffmpeg`
+- **Linux**: `sudo apt install ffmpeg` eller `sudo dnf install ffmpeg`
+
+### "Kan inte aktivera virtuell miljö" (PowerShell)
+- Kör: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+- Eller använd Windows Terminal istället för gamla PowerShell
 
 ### "Kan inte nå servern från annan dator"
-- Kontrollera brandväggsinställningar
-- Kontrollera att servern körs på `0.0.0.0` (inte `127.0.0.1`)
-- Verifiera IP-adressen med `ipconfig`
+- **Alla OS**: Kontrollera att servern körs på `0.0.0.0` (inte `127.0.0.1`) i `config.py`
+- **Windows**: Kontrollera brandväggsinställningar (se sektion nedan)
+- **macOS**: Kontrollera System Preferences → Security & Privacy → Firewall
+- **Linux**: Kontrollera firewall: `sudo ufw allow 5000` (Ubuntu) eller `sudo firewall-cmd --add-port=5000/tcp` (Fedora)
+- Verifiera IP-adressen:
+  - Windows: `ipconfig`
+  - macOS: `ifconfig`
+  - Linux: `ip addr` eller `hostname -I`
 
 ### "Nedladdningen misslyckas"
 - Kontrollera att URL:en är korrekt
 - Vissa program kan vara geo-blockerade eller kräva inloggning
 - Kontrollera att svtplay-dl fungerar via kommandoraden: `svtplay-dl [URL]`
+- Försök uppdatera svtplay-dl: `pip install --upgrade svtplay-dl`
 
 ## Utveckling
 

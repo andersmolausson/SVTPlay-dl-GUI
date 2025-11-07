@@ -28,12 +28,97 @@
                 </h5>
 
                 <form id="downloadForm">
+                    <!-- Saved Profile Selection -->
+                    <div class="mb-3">
+                        <label for="profileSelect" class="form-label">Sparade serier</label>
+                        <div class="input-group">
+                            <select class="form-select" id="profileSelect">
+                                <option value="">-- Välj en sparad serie eller skapa ny --</option>
+                            </select>
+                            <button type="button" class="btn btn-outline-danger" id="deleteProfileBtn" disabled>
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Series Name -->
+                    <div class="mb-3">
+                        <label for="seriesName" class="form-label">Serie-namn (för att spara profil)</label>
+                        <input type="text" class="form-control" id="seriesName"
+                               placeholder="t.ex. På Spåret">
+                        <div class="form-text">Valfritt: Ge ett namn för att spara denna nedladdning för framtida användning</div>
+                    </div>
+
                     <!-- URL Input -->
                     <div class="mb-3">
                         <label for="urlInput" class="form-label">Video-URL</label>
                         <input type="url" class="form-control" id="urlInput"
                                placeholder="https://www.svtplay.se/video/..." required>
                         <div class="form-text">Klistra in länken till programmet eller serien du vill ladda ner</div>
+                    </div>
+
+                    <!-- Download Directory -->
+                    <div class="mb-3">
+                        <label for="downloadDir" class="form-label">Nedladdningsmapp</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="downloadDir"
+                                   placeholder="t.ex. D:\TV-Serier eller /home/user/videos">
+                            <button class="btn btn-outline-secondary" type="button" id="browseFolderBtn">
+                                <i class="bi bi-folder2-open"></i> Bläddra
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            Ange den mapp där du vill spara nedladdningen. Om tom används standardmappen "downloads".
+                            <br><strong>Tips:</strong> Ange din TV-serie-mapp, så skapas en undermapp för serien automatiskt.
+                        </div>
+                    </div>
+
+                    <!-- Token (for TV4 Play and premium content) -->
+                    <div class="mb-3">
+                        <label for="tokenInput" class="form-label">
+                            Token (valfritt - krävs för TV4 Play och premium-innehåll)
+                            <button type="button" class="btn btn-sm btn-outline-info ms-2" data-bs-toggle="collapse" data-bs-target="#tokenInstructions">
+                                <i class="bi bi-question-circle"></i> Hur hittar jag token?
+                            </button>
+                        </label>
+                        <input type="text" class="form-control" id="tokenInput"
+                               placeholder="Valfritt - endast för TV4 Play och premium-sajter">
+
+                        <!-- Token Instructions (collapsed by default) -->
+                        <div class="collapse mt-2" id="tokenInstructions">
+                            <div class="card card-body bg-light">
+                                <h6><i class="bi bi-info-circle"></i> Så hittar du token för TV4 Play:</h6>
+
+                                <div class="alert alert-success small mb-3">
+                                    <strong>Enklaste metoden (rekommenderas):</strong>
+                                    <ol class="mb-0 mt-2">
+                                        <li>Öppna <a href="https://www.tv4play.se/" target="_blank">TV4 Play</a> och logga in</li>
+                                        <li>Tryck <kbd>F12</kbd> för att öppna Developer Tools</li>
+                                        <li>Gå till fliken <strong>"Console"</strong></li>
+                                        <li>Klistra in följande kod och tryck Enter:
+                                            <pre class="bg-dark text-light p-2 mt-1 mb-1" style="font-size: 0.75rem;">document.cookie.split("; ").find((row) => row.startsWith("tv4-refresh-token="))?.split("=")[1];</pre>
+                                        </li>
+                                        <li>Kopiera den text som visas (utan citattecken) och klistra in ovan</li>
+                                    </ol>
+                                </div>
+
+                                <details class="small">
+                                    <summary class="text-muted" style="cursor: pointer;">Alternativ metod (manuell sökning)</summary>
+                                    <ol class="mt-2 mb-0">
+                                        <li>Öppna <a href="https://www.tv4play.se/" target="_blank">TV4 Play</a> och logga in</li>
+                                        <li>Tryck <kbd>F12</kbd> för att öppna Developer Tools</li>
+                                        <li>Gå till fliken <strong>"Application"</strong> (Chrome) eller <strong>"Storage"</strong> (Firefox)</li>
+                                        <li>Välj <strong>"Cookies"</strong> → <strong>"https://www.tv4play.se"</strong></li>
+                                        <li>Hitta cookie som heter exakt <code>tv4-refresh-token</code></li>
+                                        <li>Kopiera värdet (börjar ofta med "ey...") och klistra in ovan</li>
+                                    </ol>
+                                </details>
+
+                                <p class="small text-muted mb-0 mt-2">
+                                    <strong>Tips:</strong> Token är oftast giltig i 30+ dagar. Spara den i en profil så slipper du kopiera varje gång!
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Download Type -->
@@ -81,6 +166,10 @@
                             <i class="bi bi-download"></i>
                             Starta nedladdning
                         </button>
+                        <button type="button" class="btn btn-success btn-lg" id="saveProfileBtn">
+                            <i class="bi bi-bookmark-plus"></i>
+                            Spara profil
+                        </button>
                         <button type="button" class="btn btn-outline-secondary btn-lg" id="checkInfoBtn">
                             <i class="bi bi-info-circle"></i>
                             Hämta info
@@ -122,7 +211,7 @@
         </div>
 
         <!-- Downloaded Files -->
-        <div class="card shadow-sm">
+        <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <h5 class="card-title mb-4">
                     <i class="bi bi-folder2-open"></i>
@@ -140,6 +229,42 @@
                 </div>
             </div>
         </div>
+
+        <!-- System Admin -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-4">
+                    <i class="bi bi-gear"></i>
+                    Systeminställningar
+                </h5>
+
+                <!-- System Info -->
+                <div class="mb-3">
+                    <h6>Systeminformation</h6>
+                    <div id="systemInfo">
+                        <small class="text-muted">Laddar...</small>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Upgrade Section -->
+                <div class="mb-3">
+                    <h6>Uppgradering</h6>
+                    <p class="text-muted small">Uppgradera till senaste version från GitHub</p>
+                    <button class="btn btn-warning" id="upgradeBtn">
+                        <i class="bi bi-arrow-up-circle"></i>
+                        Uppgradera system
+                    </button>
+                </div>
+
+                <!-- Upgrade Output -->
+                <div id="upgradeOutput" class="mt-3" style="display: none;">
+                    <div class="alert" id="upgradeAlert"></div>
+                    <div id="upgradeDetails" class="small" style="max-height: 300px; overflow-y: auto; background: #f5f5f5; padding: 10px; border-radius: 4px; font-family: monospace;"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Toast for notifications -->
@@ -150,6 +275,40 @@
                 <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
             </div>
             <div class="toast-body" id="toastMessage"></div>
+        </div>
+    </div>
+
+    <!-- Folder Browser Modal -->
+    <div class="modal fade" id="folderBrowserModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Välj nedladdningsmapp (på servern)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Aktuell sökväg:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="currentPathInput" readonly>
+                            <button class="btn btn-outline-secondary" type="button" id="refreshFoldersBtn" title="Uppdatera">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="folderList" class="list-group" style="max-height: 400px; overflow-y: auto;">
+                        <div class="text-center p-4">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Laddar...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Avbryt</button>
+                    <button type="button" class="btn btn-primary" id="selectFolderBtn">Välj denna mapp</button>
+                </div>
+            </div>
         </div>
     </div>
 

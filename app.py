@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
+import sys
 from config import Config
 from svtplay_handler import SVTPlayDownloader
+from profile_manager import ProfileManager
 
 # Initialize Flask app
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -11,8 +13,9 @@ CORS(app)
 # Initialize configuration
 Config.init_app()
 
-# Initialize downloader
+# Initialize downloader and profile manager
 downloader = SVTPlayDownloader()
+profile_manager = ProfileManager()
 
 @app.route('/')
 def index():
@@ -106,6 +109,233 @@ def list_files():
 def download_file(filename):
     """Serve downloaded files"""
     return send_from_directory(Config.DOWNLOAD_DIR, filename, as_attachment=True)
+
+# Profile management endpoints
+
+@app.route('/api/profiles', methods=['GET'])
+def get_profiles():
+    """Get all saved profiles"""
+    result = profile_manager.get_all_profiles()
+    return jsonify(result)
+
+@app.route('/api/profiles/<profile_id>', methods=['GET'])
+def get_profile(profile_id):
+    """Get a specific profile"""
+    result = profile_manager.get_profile(profile_id)
+    if result['success']:
+        return jsonify(result)
+    else:
+        return jsonify(result), 404
+
+@app.route('/api/profiles', methods=['POST'])
+def save_profile():
+    """Save or update a profile"""
+    data = request.get_json()
+
+    name = data.get('name')
+    url = data.get('url')
+    download_dir = data.get('download_dir')
+
+    if not all([name, url, download_dir]):
+        return jsonify({'success': False, 'error': 'Name, URL, and download directory are required'}), 400
+
+    quality = data.get('quality', Config.DEFAULT_QUALITY)
+    subtitle = data.get('subtitle', Config.DEFAULT_SUBTITLE)
+    download_type = data.get('download_type', 'single')
+    token = data.get('token')  # Optional
+
+    result = profile_manager.save_profile(name, url, download_dir, quality, subtitle, download_type, token)
+    return jsonify(result)
+
+@app.route('/api/profiles/<profile_id>', methods=['DELETE'])
+def delete_profile(profile_id):
+    """Delete a profile"""
+    result = profile_manager.delete_profile(profile_id)
+    if result['success']:
+        return jsonify(result)
+    else:
+        return jsonify(result), 404
+
+@app.route('/api/profiles/search', methods=['GET'])
+def search_profiles():
+    """Search profiles by name"""
+    query = request.args.get('q', '')
+    result = profile_manager.search_profiles(query)
+    return jsonify(result)
+
+# System management endpoints
+
+@app.route('/api/system/upgrade', methods=['POST'])
+def upgrade_system():
+    """Upgrade the application (git pull + pip install)"""
+    import subprocess
+    try:
+        # Run git pull
+        git_result = subprocess.run(
+            ['git', 'pull'],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            cwd=Config.BASE_DIR
+        )
+
+        if git_result.returncode != 0:
+            return jsonify({
+                'success': False,
+                'error': f'Git pull failed: {git_result.stderr}'
+            }), 500
+
+        git_output = git_result.stdout
+
+        # Run pip install --upgrade
+        pip_result = subprocess.run(
+            [sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt', '--upgrade'],
+            capture_output=True,
+            text=True,
+            timeout=300,
+            cwd=Config.BASE_DIR
+        )
+
+        if pip_result.returncode != 0:
+            return jsonify({
+                'success': False,
+                'error': f'Pip upgrade failed: {pip_result.stderr}',
+                'git_output': git_output
+            }), 500
+
+        return jsonify({
+            'success': True,
+            'message': 'Upgrade completed successfully',
+            'git_output': git_output,
+            'pip_output': pip_result.stdout,
+            'restart_required': 'Already up to date' not in git_output
+        })
+
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            'success': False,
+            'error': 'Upgrade timed out'
+        }), 500
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/system/info', methods=['GET'])
+def get_system_info():
+    """Get system information"""
+    import subprocess
+    try:
+        # Get Python version
+        python_version = sys.version.split()[0]
+
+        # Get svtplay-dl version
+        svtplay_result = subprocess.run(
+            [sys.executable, '-m', 'svtplay_dl', '--version'],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        svtplay_version = svtplay_result.stdout.strip() if svtplay_result.returncode == 0 else 'Unknown'
+
+        # Get git branch
+        git_branch_result = subprocess.run(
+            ['git', 'branch', '--show-current'],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            cwd=Config.BASE_DIR
+        )
+        git_branch = git_branch_result.stdout.strip() if git_branch_result.returncode == 0 else 'Unknown'
+
+        # Get latest commit
+        git_log_result = subprocess.run(
+            ['git', 'log', '-1', '--oneline'],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            cwd=Config.BASE_DIR
+        )
+        latest_commit = git_log_result.stdout.strip() if git_log_result.returncode == 0 else 'Unknown'
+
+        return jsonify({
+            'success': True,
+            'info': {
+                'python_version': python_version,
+                'svtplay_dl_version': svtplay_version,
+                'git_branch': git_branch,
+                'latest_commit': latest_commit,
+                'download_dir': Config.DOWNLOAD_DIR
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/browse-folders', methods=['POST'])
+def browse_folders():
+    """Browse folders on the server"""
+    try:
+        data = request.get_json()
+        path = data.get('path', os.path.expanduser('~'))  # Default to user's home directory
+
+        # Security: normalize path and ensure it's absolute
+        path = os.path.abspath(os.path.expanduser(path))
+
+        # Check if path exists and is a directory
+        if not os.path.exists(path):
+            return jsonify({
+                'success': False,
+                'error': 'Path does not exist'
+            }), 400
+
+        if not os.path.isdir(path):
+            # If it's a file, use its parent directory
+            path = os.path.dirname(path)
+
+        # List directories only
+        try:
+            items = []
+
+            # Add parent directory option (if not at root)
+            parent = os.path.dirname(path)
+            if parent != path:  # Not at root
+                items.append({
+                    'name': '..',
+                    'path': parent,
+                    'is_parent': True
+                })
+
+            # List all directories in current path
+            for item in sorted(os.listdir(path)):
+                item_path = os.path.join(path, item)
+                if os.path.isdir(item_path):
+                    items.append({
+                        'name': item,
+                        'path': item_path,
+                        'is_parent': False
+                    })
+
+            return jsonify({
+                'success': True,
+                'current_path': path,
+                'items': items
+            })
+
+        except PermissionError:
+            return jsonify({
+                'success': False,
+                'error': 'Permission denied'
+            }), 403
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 if __name__ == '__main__':
     print("=" * 60)
