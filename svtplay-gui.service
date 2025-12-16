@@ -1,0 +1,14 @@
+[Unit]
+Description=SVTPlay-dl Web GUI
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/user/SVTPlay-dl-GUI
+ExecStart=/home/user/SVTPlay-dl-GUI/venv/bin/python /home/user/SVTPlay-dl-GUI/app.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
