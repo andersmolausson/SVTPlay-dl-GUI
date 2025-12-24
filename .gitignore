@@ -18,6 +18,9 @@ downloads/
 *.mkv
 *.srt
 
+# Cookies (sensitive - contains authentication data)
+cookies/
+
 # IDE
 .vscode/
 .idea/

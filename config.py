@@ -9,6 +9,9 @@ class Config:
     # Download directory
     DOWNLOAD_DIR = os.path.join(BASE_DIR, 'downloads')
 
+    # Cookies directory
+    COOKIES_DIR = os.path.join(BASE_DIR, 'cookies')
+
     # Server configuration
     HOST = '0.0.0.0'  # Listen on all interfaces to be accessible from network
     PORT = 5000
@@ -21,7 +24,11 @@ class Config:
     DEFAULT_QUALITY = 'best'
     DEFAULT_SUBTITLE = True
 
+    # Cookie file for authenticated downloads
+    COOKIE_FILE = os.path.join(COOKIES_DIR, 'cookies.txt')
+
     @staticmethod
     def init_app():
         """Initialize application directories"""
         os.makedirs(Config.DOWNLOAD_DIR, exist_ok=True)
+        os.makedirs(Config.COOKIES_DIR, exist_ok=True)

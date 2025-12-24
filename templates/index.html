@@ -19,6 +19,88 @@
             <p class="lead text-muted">Ladda ner TV-program från SVT Play och andra svenska streamingsajter</p>
         </div>
 
+        <!-- Cookie Authentication (for premium content) -->
+        <div class="card shadow-sm mb-4" id="cookieCard">
+            <div class="card-body">
+                <h5 class="card-title mb-3">
+                    <i class="bi bi-shield-lock"></i>
+                    Autentisering (för TV4 Play Plus och andra betalväggar)
+                    <button type="button" class="btn btn-sm btn-outline-info float-end" data-bs-toggle="collapse" data-bs-target="#cookieInstructions">
+                        <i class="bi bi-question-circle"></i> Hur fungerar det?
+                    </button>
+                </h5>
+
+                <!-- Cookie Status -->
+                <div id="cookieStatus" class="mb-3">
+                    <div class="alert alert-warning d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <span>Kontrollerar cookie-status...</span>
+                    </div>
+                </div>
+
+                <!-- Cookie Upload Form -->
+                <div class="mb-3">
+                    <label for="cookieFile" class="form-label">Ladda upp cookies.txt</label>
+                    <input type="file" class="form-control" id="cookieFile" accept=".txt">
+                    <div class="form-text">
+                        Välj en cookies.txt fil exporterad från din webbläsare där du är inloggad på TV4 Play eller annan sajt
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex">
+                    <button type="button" class="btn btn-primary" id="uploadCookieBtn">
+                        <i class="bi bi-upload"></i>
+                        Ladda upp cookies
+                    </button>
+                    <button type="button" class="btn btn-outline-danger" id="deleteCookieBtn" style="display: none;">
+                        <i class="bi bi-trash"></i>
+                        Ta bort cookies
+                    </button>
+                </div>
+
+                <!-- Cookie Instructions (collapsed by default) -->
+                <div class="collapse mt-3" id="cookieInstructions">
+                    <div class="card card-body bg-light">
+                        <h6><i class="bi bi-info-circle"></i> Så exporterar du cookies från din webbläsare:</h6>
+
+                        <div class="alert alert-info small mb-3">
+                            <strong>Metod 1: Använd webbläsartillägg (enklast)</strong>
+                            <ol class="mb-0 mt-2">
+                                <li>Installera tillägget "Get cookies.txt LOCALLY" för:
+                                    <ul>
+                                        <li><a href="https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc" target="_blank">Chrome/Edge</a></li>
+                                        <li><a href="https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/" target="_blank">Firefox</a></li>
+                                    </ul>
+                                </li>
+                                <li>Gå till <a href="https://www.tv4play.se/" target="_blank">TV4 Play</a> och logga in</li>
+                                <li>Klicka på tilläggsikonen och välj "Export"</li>
+                                <li>Spara filen som <code>cookies.txt</code></li>
+                                <li>Ladda upp filen här</li>
+                            </ol>
+                        </div>
+
+                        <div class="alert alert-secondary small">
+                            <strong>Metod 2: Använd EditThisCookie (Chrome/Edge)</strong>
+                            <ol class="mb-0 mt-2">
+                                <li>Installera <a href="https://chrome.google.com/webstore/detail/editthiscookie/fngmhnnpilhplaeedifhccceomclgfbg" target="_blank">EditThisCookie</a></li>
+                                <li>Gå till TV4 Play och logga in</li>
+                                <li>Klicka på EditThisCookie-ikonen</li>
+                                <li>Klicka på "Export" längst ner (ger Netscape-format)</li>
+                                <li>Spara innehållet som <code>cookies.txt</code></li>
+                                <li>Ladda upp filen här</li>
+                            </ol>
+                        </div>
+
+                        <div class="alert alert-warning small mb-0">
+                            <i class="bi bi-shield-exclamation"></i>
+                            <strong>Säkerhetsnotering:</strong> Cookies innehåller inloggningsinformation. Dela aldrig din cookies-fil med andra.
+                            Filen sparas lokalt på din server och används endast för nedladdningar.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Form -->
         <div class="card shadow-sm mb-4">
             <div class="card-body">

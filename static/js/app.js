@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadDownloads();
     loadFiles();
     loadProfiles();
+    checkCookieStatus();
 
     // Set up event listeners
     document.getElementById('downloadForm').addEventListener('submit', handleDownload);
@@ -17,6 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('deleteProfileBtn').addEventListener('click', deleteProfile);
     document.getElementById('profileSelect').addEventListener('change', loadProfileData);
     document.getElementById('upgradeBtn').addEventListener('click', upgradeSystem);
+    document.getElementById('uploadCookieBtn').addEventListener('click', uploadCookie);
+    document.getElementById('deleteCookieBtn').addEventListener('click', deleteCookie);
 
     // Load system info
     loadSystemInfo();
@@ -761,5 +764,93 @@ async function loadFolders(path) {
         }
     } catch (error) {
         folderList.innerHTML = `<div class="list-group-item list-group-item-danger">Fel vid laddning: ${error.message}</div>`;
+    }
+}
+
+// Cookie management functions
+
+async function checkCookieStatus() {
+    try {
+        const response = await fetch(API_BASE + '/api/cookies/status');
+        const result = await response.json();
+
+        const statusDiv = document.getElementById('cookieStatus');
+        const deleteBtn = document.getElementById('deleteCookieBtn');
+
+        if (result.success && result.has_cookies) {
+            const date = new Date(result.modified * 1000);
+            statusDiv.innerHTML = `
+                <div class="alert alert-success d-flex align-items-center">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span>Cookies är uppladdade och aktiva. Senast uppdaterad: ${date.toLocaleString('sv-SE')}</span>
+                </div>
+            `;
+            deleteBtn.style.display = 'inline-block';
+        } else {
+            statusDiv.innerHTML = `
+                <div class="alert alert-info d-flex align-items-center">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <span>Inga cookies uppladdade. Ladda upp cookies för att få tillgång till premium-innehåll.</span>
+                </div>
+            `;
+            deleteBtn.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error checking cookie status:', error);
+    }
+}
+
+async function uploadCookie() {
+    const fileInput = document.getElementById('cookieFile');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        showNotification('Välj en cookies-fil först', 'warning');
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(API_BASE + '/api/cookies/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification(result.message, 'success');
+            checkCookieStatus();
+            fileInput.value = ''; // Clear file input
+        } else {
+            showNotification('Fel: ' + result.error, 'danger');
+        }
+    } catch (error) {
+        showNotification('Fel vid uppladdning: ' + error.message, 'danger');
+    }
+}
+
+async function deleteCookie() {
+    if (!confirm('Är du säker på att du vill ta bort cookies? Du kommer inte kunna ladda ner premium-innehåll.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(API_BASE + '/api/cookies/delete', {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification(result.message, 'success');
+            checkCookieStatus();
+        } else {
+            showNotification('Fel: ' + result.error, 'danger');
+        }
+    } catch (error) {
+        showNotification('Fel vid borttagning: ' + error.message, 'danger');
     }
 }

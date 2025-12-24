@@ -253,6 +253,10 @@ class SVTPlayDownloader:
             if options and options.get('subtitle', Config.DEFAULT_SUBTITLE):
                 cmd.append('--subtitle')
 
+            # Add cookies if cookie file exists (for authenticated downloads like TV4 Play)
+            if os.path.exists(Config.COOKIE_FILE):
+                cmd.extend(['--cookies', Config.COOKIE_FILE])
+
             # Add token if provided (for TV4 Play and premium content)
             if options and options.get('token'):
                 cmd.extend(['--token', options.get('token')])
@@ -393,6 +397,10 @@ class SVTPlayDownloader:
             # Add subtitle option
             if options and options.get('subtitle', Config.DEFAULT_SUBTITLE):
                 cmd.append('--subtitle')
+
+            # Add cookies if cookie file exists (for authenticated downloads like TV4 Play)
+            if os.path.exists(Config.COOKIE_FILE):
+                cmd.extend(['--cookies', Config.COOKIE_FILE])
 
             # Add token if provided (for TV4 Play and premium content)
             if options and options.get('token'):

@@ -110,6 +110,59 @@ def download_file(filename):
     """Serve downloaded files"""
     return send_from_directory(Config.DOWNLOAD_DIR, filename, as_attachment=True)
 
+# Cookie management endpoints (for authenticated downloads)
+
+@app.route('/api/cookies/upload', methods=['POST'])
+def upload_cookies():
+    """Upload cookies file for authenticated downloads"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'success': False, 'error': 'No file provided'}), 400
+
+        file = request.files['file']
+
+        if file.filename == '':
+            return jsonify({'success': False, 'error': 'No file selected'}), 400
+
+        # Save the cookies file
+        file.save(Config.COOKIE_FILE)
+
+        return jsonify({
+            'success': True,
+            'message': 'Cookies uploaded successfully. You can now download authenticated content.'
+        })
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/cookies/status', methods=['GET'])
+def get_cookie_status():
+    """Check if cookies file exists"""
+    exists = os.path.exists(Config.COOKIE_FILE)
+    modified = None
+
+    if exists:
+        modified = os.path.getmtime(Config.COOKIE_FILE)
+
+    return jsonify({
+        'success': True,
+        'has_cookies': exists,
+        'modified': modified
+    })
+
+@app.route('/api/cookies/delete', methods=['DELETE'])
+def delete_cookies():
+    """Delete cookies file"""
+    try:
+        if os.path.exists(Config.COOKIE_FILE):
+            os.remove(Config.COOKIE_FILE)
+            return jsonify({'success': True, 'message': 'Cookies deleted successfully'})
+        else:
+            return jsonify({'success': False, 'error': 'No cookies file found'}), 404
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 # Profile management endpoints
 
 @app.route('/api/profiles', methods=['GET'])

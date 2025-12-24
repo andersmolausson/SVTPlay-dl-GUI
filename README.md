@@ -21,7 +21,8 @@ Ett webbaserat grafiskt gränssnitt för [svtplay-dl](https://svtplay-dl.se/), v
 
 **Primärt fokus och fullt stöd:**
 - **SVT Play** (svtplay.se)
-- **TV4 Play** (tv4play.se) - Med token-autentisering för premium-innehåll
+- **TV4 Play** (tv4play.se) - Inkl. TV4 Play Plus med cookie-autentisering
+  - Se [COOKIE_AUTH_GUIDE.md](COOKIE_AUTH_GUIDE.md) för guide om hur du laddar ner premium-innehåll
 
 **Andra svenska streamingsajter som stöds av svtplay-dl:**
 - Viafree
@@ -204,16 +205,22 @@ PATH hanteras vanligtvis automatiskt när du använder `apt`, `dnf` eller andra 
 6. Välj önskad kvalitet
 7. Klicka på "Starta nedladdning"
 
-### Snabbstart: Ladda ner från TV4 Play
+### Snabbstart: Ladda ner från TV4 Play (inkl. Plus-innehåll)
 
-1. **Hämta token först** (se [TV4 Play-instruktioner](#tv4-play-och-premium-innehåll) nedan)
-2. Gå till TV4 Play och hitta programmet (t.ex. "Bäst i test")
-3. Kopiera URL:en (använd programsidan för hela säsongen: `https://www.tv4play.se/program/bast-i-test`)
-4. Klistra in URL:en i "Video-URL" fältet
-5. Klistra in din **token** i "Token"-fältet
+**För gratis innehåll:**
+- Fungerar direkt utan autentisering
+
+**För TV4 Play Plus (premium-innehåll):**
+1. **Exportera cookies från din webbläsare** (se [Cookie-guide](COOKIE_AUTH_GUIDE.md))
+2. **Ladda upp cookies** i "Autentisering"-avsnittet högst upp på sidan
+3. Gå till TV4 Play och hitta programmet (t.ex. "Bäst i test")
+4. Kopiera URL:en (använd programsidan för hela säsongen: `https://www.tv4play.se/program/bast-i-test`)
+5. Klistra in URL:en i "Video-URL" fältet
 6. Välj "Hela säsongen" för att få alla avsnitt
 7. Klicka på "Starta nedladdning"
 8. **Se realtidsstatus** - Listan visar vilka avsnitt som laddas ner (✅) och vilka som hoppas över (⏭️)
+
+💡 **Tips:** Läs den kompletta [Cookie-autentiseringsguiden](COOKIE_AUTH_GUIDE.md) för detaljerade instruktioner.
 
 ### Använda sparade profiler (för återkommande nedladdningar)
 
