@@ -597,7 +597,7 @@ async function upgradeSystem() {
     const upgradeAlert = document.getElementById('upgradeAlert');
     const upgradeDetails = document.getElementById('upgradeDetails');
 
-    if (!confirm('Är du säker på att du vill uppgradera systemet?\n\nDetta kommer att:\n- Hämta senaste koden från GitHub\n- Uppgradera alla Python-paket\n\nServern behöver startas om efter uppgraderingen.')) {
+    if (!confirm('Är du säker på att du vill uppgradera systemet?\n\nDetta kommer att:\n- Hämta senaste koden från GitHub (från din nuvarande branch)\n- Uppgradera alla Python-paket\n\nServern behöver startas om MANUELLT efter uppgraderingen.\n\nDetta kan ta 1-2 minuter.')) {
         return;
     }
 
@@ -628,8 +628,8 @@ async function upgradeSystem() {
             upgradeDetails.textContent = details;
 
             if (result.restart_required) {
-                upgradeAlert.textContent += '\n\nVIKTIGT: Starta om servern för att använda de nya uppdateringarna!';
-                showNotification('Uppgradering klar! Starta om servern.', 'warning');
+                upgradeAlert.innerHTML = result.message + '<br><br><strong>VIKTIGT: Starta om servern manuellt för att använda de nya uppdateringarna!</strong><br><br>Så här gör du:<br>1. Stoppa servern (Ctrl+C i kommandotolken)<br>2. Starta servern igen med: <code>start.bat</code><br>3. Ladda om denna sida (Ctrl+F5)';
+                showNotification('Uppgradering klar! Starta om servern manuellt.', 'warning');
             } else {
                 showNotification('Systemet är redan uppdaterat!', 'success');
             }

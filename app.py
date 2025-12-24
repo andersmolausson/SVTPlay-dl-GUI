@@ -223,9 +223,26 @@ def upgrade_system():
     """Upgrade the application (git pull + pip install)"""
     import subprocess
     try:
-        # Run git pull
+        # Get current branch first
+        branch_result = subprocess.run(
+            ['git', 'branch', '--show-current'],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            cwd=Config.BASE_DIR
+        )
+
+        if branch_result.returncode != 0:
+            return jsonify({
+                'success': False,
+                'error': f'Failed to get current branch: {branch_result.stderr}'
+            }), 500
+
+        current_branch = branch_result.stdout.strip()
+
+        # Run git pull with explicit origin and branch
         git_result = subprocess.run(
-            ['git', 'pull'],
+            ['git', 'pull', 'origin', current_branch],
             capture_output=True,
             text=True,
             timeout=60,
@@ -235,7 +252,8 @@ def upgrade_system():
         if git_result.returncode != 0:
             return jsonify({
                 'success': False,
-                'error': f'Git pull failed: {git_result.stderr}'
+                'error': f'Git pull failed: {git_result.stderr}',
+                'branch': current_branch
             }), 500
 
         git_output = git_result.stdout
